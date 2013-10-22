@@ -8,18 +8,18 @@ import java.util.NoSuchElementException;
  */
 public class LinkedList<T> implements Iterable<T> {
 
-    private Entry start;
+    private Node start;
 
-    private class Entry {
+    private class Node {
         private T object;
-        private Entry next;
+        private Node next;
 
-        Entry(T object, Entry next) {
+        Node(T object, Node next) {
             this.object = object;
             this.next = next;
         }
 
-        Entry(T object) {
+        Node(T object) {
             this.object = object;
         }
 
@@ -27,11 +27,11 @@ public class LinkedList<T> implements Iterable<T> {
             return object;
         }
 
-        Entry getNext() {
+        Node getNext() {
             return next;
         }
 
-        void setNext(Entry next) {
+        void setNext(Node next) {
             this.next = next;
         }
 
@@ -41,19 +41,26 @@ public class LinkedList<T> implements Iterable<T> {
             if (obj == null) {
                 return false;
             }
-            if (!(obj instanceof LinkedList<?>.Entry)) {
+            if (!(obj instanceof LinkedList<?>.Node)) {
                 return false;
             }
-            Entry entry = (Entry) obj;
-            return entry.next == next &&
-                    entry.object == object;
+            Node node = (Node) obj;
+            return node.object == object;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 37;
+            result = 37 * result + (object != null
+                    ? object.hashCode() : 0);
+            return result;
         }
     }
 
-    private class EntryIterator<T> implements Iterator<T> {
-        private LinkedList<T>.Entry current;
+    private class NodeIterator implements Iterator<T> {
+        private Node current;
 
-        public EntryIterator(LinkedList<T>.Entry start) {
+        public NodeIterator(Node start) {
             current = start;
         }
 
@@ -78,9 +85,9 @@ public class LinkedList<T> implements Iterable<T> {
         }
     }
 
-    private Entry getLastEntry() {
+    private Node getLastEntry() {
         if (start != null) {
-            Entry current = start;
+            Node current = start;
             while (current.getNext() != null) {
                 current = current.getNext();
             }
@@ -90,11 +97,11 @@ public class LinkedList<T> implements Iterable<T> {
     }
 
     public Iterator<T> iterator() {
-        return new EntryIterator<T>(start);
+        return new NodeIterator(start);
     }
 
     public T last() {
-        Entry e = getLastEntry();
+        Node e = getLastEntry();
         if (e != null) {
             return e.getObject();
         }
@@ -111,7 +118,7 @@ public class LinkedList<T> implements Iterable<T> {
     public int size() {
         int i = 0;
         if (start != null) {
-            Entry current = start;
+            Node current = start;
             while (current != null) {
                 current = current.getNext();
                 i += 1;
@@ -121,22 +128,22 @@ public class LinkedList<T> implements Iterable<T> {
     }
 
     public void prepend(T object) {
-        start = new Entry(object, start);
+        start = new Node(object, start);
     }
 
     public void append(T object) {
-        Entry last = getLastEntry();
+        Node last = getLastEntry();
         if (last != null) {
-            Entry next = new Entry(object);
+            Node next = new Node(object);
             last.setNext(next);
         } else {
-            start = new Entry(object);
+            start = new Node(object);
         }
     }
 
     public boolean contains(T object) {
         if (start != null) {
-            Entry current = start;
+            Node current = start;
             while (current != null) {
                 if (current.getObject() == object) {
                     return true;
@@ -147,6 +154,7 @@ public class LinkedList<T> implements Iterable<T> {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object o) {
         if (o == null) {
@@ -157,32 +165,34 @@ public class LinkedList<T> implements Iterable<T> {
         }
         LinkedList<?> l = (LinkedList<?>) o;
 
-        LinkedList<?>.Entry current = start;
-        LinkedList<?>.Entry oCurrent = l.start;
+        if (this.size() != l.size()) {
+            return false;
+        }
 
-        if (current != oCurrent) {
+        LinkedList<?>.Node current = start;
+        LinkedList<?>.Node otherCurrent = l.start;
+
+        if (!current.equals(otherCurrent)) {
             return false;
         }
 
         while (current != null) {
-            if (!current.equals(oCurrent)) {
+            if (!current.equals(otherCurrent)) {
                 return false;
             }
             current = current.getNext();
-            oCurrent = oCurrent.getNext();
-        }
-
-        current = start;
-        oCurrent = l.start;
-
-        while (oCurrent != null) {
-            if (!oCurrent.equals(current)) {
-                return false;
-            }
-            current = current.getNext();
-            oCurrent = oCurrent.getNext();
+            otherCurrent = otherCurrent.getNext();
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 97;
+        for (T e : this) {
+            result = 97 * result + e.hashCode();
+        }
+        return result;
     }
 }

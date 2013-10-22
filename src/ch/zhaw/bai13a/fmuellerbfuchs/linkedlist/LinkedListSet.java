@@ -1,6 +1,6 @@
 package ch.zhaw.bai13a.fmuellerbfuchs.linkedlist;
 
-import java.util.Iterator;
+import java.util.*;
 
 /**
  */
@@ -46,26 +46,37 @@ public class LinkedListSet<T> implements Iterable<T> {
     }
 
     public LinkedListSet<T> union(LinkedListSet<T> other) {
+        LinkedListSet<T> newSet = new LinkedListSet<T>();
+        for (T e : this) {
+            newSet.add(e);
+        }
         if (other == null) {
-            return this;
+            return newSet;
         }
         for (T t : other) {
-            add(t);
+            newSet.add(t);
         }
-        return this;
+        return newSet;
     }
 
     public LinkedListSet<T> intersect(LinkedListSet<T> other) {
+        LinkedListSet<T> newSet = new LinkedListSet<T>();
         if (other == null) {
-            return new LinkedListSet<T>();
+            return newSet;
         }
-        return null;
+        for (T e : this) {
+            if (other.contains(e)) {
+                newSet.add(e);
+            }
+        }
+        return newSet;
     }
 
     public int size() {
         return list.size();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object other) {
         if (other == null) {
@@ -76,6 +87,9 @@ public class LinkedListSet<T> implements Iterable<T> {
         }
         LinkedListSet otherSet = (LinkedListSet) other;
         LinkedListSet t = (LinkedListSet) this;
+        if (otherSet.size() != t.size()) {
+            return false;
+        }
         for (Object o : this) {
             if (!otherSet.contains(o)) {
                 return false;
@@ -87,5 +101,19 @@ public class LinkedListSet<T> implements Iterable<T> {
             }
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 73;
+        List<Integer> codes = new ArrayList<Integer>();
+        for (T e : this) {
+            codes.add(e.hashCode());
+        }
+        Collections.sort(codes);
+        for (Integer i : codes) {
+            result = 41 * result + i;
+        }
+        return result;
     }
 }
